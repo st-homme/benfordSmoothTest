@@ -1,4 +1,5 @@
-require("R/probabilite_benford.R")
+# require("R/probabilite_benford.R")
+# require("R/quantile_benford.R")
 # library("polynom")
 # library("gtools")
 
@@ -8,26 +9,41 @@ require("R/probabilite_benford.R")
 #' @param data un vecteur numerique
 #' @param K un nombre entre 1 et 7
 #' @param digits le digit a testé
-#' @param optimal.t.permutations boolean
+#' @param optimal_t_k boolean
+#' @param alpha niveau de confiance
+#' @param nb_repetition Monte carlo repetition
 #' @return la fonction renvoie un vecteur contenant les tk
 #' @import gtools
 #' @export
-ksmooth.test <- function(data, K, digits= 1,
-                         optimal.t.permutations=FALSE ){
-  generer_probabilite_theorique(digit=1)
-  support.vector <- c(1:9)
-  proba.vector <- generer_probabilite_theorique(digits)
-  result <- calcul_tk(data, K,support.vector, proba.vector)
+BenfordSmooth.test <- function(data, K, digits= 1, alpha=0.05,
+                               nb_repetition= 5000,optimal_t_k=TRUE ){
+  support_vector <- c(1:9)
+  probabilite_theorique <- generer_probabilite_theorique(digits)
+  result_empirique <- calcul_tk(data, K,support_vector, probabilite_theorique)
 
   taille <- length(data)
-  if(optimal.t.permutations){
-    resultat.tmp <- vector()
-    # for(base in base.vector){
-      result <- c(result, calcul_permutations_tk_matrix(data, K))
-    # }
-
+  probabilite_empirique <- generer_probabilite_empirique(data, support_vector)
+  result_empirique <- c(result_empirique,calcul_tk_widehat(result_empirique, K, taille , base=10))
+  p_value_vector <-c()
+  if(taille <= 100){
+    quantile_vector <- calcul_quantile_monte_carlo(alpha, taille=1000, nb_repetition,
+                                                    digits, K, support_vector,
+                                                    base_smooth=10, optimal_t_k)
+    p_value_vector <- calcul_p_value(taille ,nb_repetition, quantile_vector,
+                                     K,probabilite_theorique,
+                                     probabilite_empirique,base_smooth=10,
+                                     optimal_t_k,support_vector)
+  }else{
+    p_value_vector < c()
+    for(i in 1:K){
+      p_value_vector <- c(p_value_vector, pchisq(result_empirique[i], df=i, lower.tail=TRUE) )
+    }
+    p_value_vector <- c(p_value_vector, pchisq(result_empirique[K+1], df=1,lower.tail=TRUE) )
+    # p_value_vector <- pchisq(result_empirique, df=K, lower.tail=FALSE)
   }
-
+  result <- rbind(result_empirique,p_value_vector )
+  row.names(result) <- c("Tk", "P-value")
+  colnames(result) <- c(1:K, "K data driven")
   return(result)
 }
 ###############################################################################################################

@@ -2,8 +2,8 @@
 % Please edit documentation in R/probabilite_benford.R
 \name{get_n_element_des_nombres}
 \alias{get_n_element_des_nombres}
-\title{Calcul du tk chapeau
-Une fonction pour calculer le tk chapeau}
+\title{Recuepere le FSD
+Une fonction pour recuperer le FSD}
 \usage{
 get_n_element_des_nombres(data, digits = 1)
 }
@@ -16,6 +16,6 @@ get_n_element_des_nombres(data, digits = 1)
 la fonction renvoie le polynome
 }
 \description{
-Calcul du tk chapeau
-Une fonction pour calculer le tk chapeau
+Recuepere le FSD
+Une fonction pour recuperer le FSD
 }

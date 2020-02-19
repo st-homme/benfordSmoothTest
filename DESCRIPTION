@@ -1,21 +1,21 @@
 Package: BenfordSmoothTest
-Title: Smooth Test For Benford's Law
+Title: Smooth Test For Benfords Law
 Version: 0.0.1
 Authors@R: c( 
     person(given = "Gilles",
            family = "Ducharme",
            role = "aut",
            email = "gilles.ducharme@umontpellier.fr",
-           comment = c(ORCID = "https://imag.edu.umontpellier.fr/")),
+           comment=c(ORCID="0000-0002-2560-0294")),
   person(given = "Credo",
            family = "Vovor-Dassu",
            role = c("aut", "cre"),
            email = "credo.vovor-dassu@umontpellier.fr",
-           comment = c(ORCID = "https://imag.edu.umontpellier.fr/"))
+           comment = c(ORCID = "0000-0001-5814-0266"))
            )
-Description: Test d'adéquation: Smooth test for Benford's Law. Plus d'informations en contactant les auteurs
+Description: Test d adéquation: smooth test for benfords law. Plus d informations en contactant les auteurs.
 License: GPL-3
+Depends: R (>= 3.4.0),gtools,polynom, stats
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
-Imports: gtools,polynom, stats

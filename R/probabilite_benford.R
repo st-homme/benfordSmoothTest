@@ -65,8 +65,8 @@ get_probabilite_conjointe_n_number <- function(data, max.digits=1, base=10){
   return(proba.vector)
 }
 
-#' Calcul du tk chapeau
-#' Une fonction pour calculer le tk chapeau
+#' Recuepere le FSD
+#' Une fonction pour recuperer le FSD
 #'
 #' @param data vecteur numerique
 #' @param digits FSD
@@ -79,6 +79,7 @@ get_n_element_des_nombres <- function(data, digits=1){
     d <- 1
     number.vector <- vector()
     for(i in list_of_number){
+      if(!i %in% c(".","-")){
       if (d <= digits){
         if (as.numeric(i) %in% 0:9){
           if (d == 1){
@@ -93,8 +94,47 @@ get_n_element_des_nombres <- function(data, digits=1){
           }
         }
       }
-    }
+      }
+      }
     data.digits[[number]] <- number.vector
   }
   return(data.digits)
+}
+
+#' Generer des donnees suivant benford
+#' Une fonction pour generer de la data suivant benford
+#'
+#' @param n taille de l echantillon
+#' @param support_vector_to_use vecteur numerique
+#' @param digits FSD
+#' @param base Base
+#' @return la fonction renvoie un vecteur numerique
+#' @export
+generer_data_benford <- function(n, support_vector_to_use,
+                                 digits=1, base= 10){
+  return(sample(support_vector_to_use, size = n,
+                prob = get_probabilite_benford_for_digit_support(digits, base),
+                replace = TRUE)
+  )
+}
+
+#' Generer le vecteur de probabilite emprique
+#' Une fonction pour generer le vecteur de probabilite emprique
+#'
+#' @param data vecteur numerique
+#' @param support_vector_to_use vecteur numerique
+#' @param digits FSD
+#' @return la fonction renvoie un vecteur de probabilite
+#' @export
+generer_probabilite_empirique <- function(data, support_vector_to_use, digits=1){
+  data <- unlist(get_n_element_des_nombres(data, digits))
+  pi.empirique <- vector()
+  k <- 1
+  for (i in support_vector_to_use){
+    pi.empirique[k] <- length(which(data == i))
+    k <- k+1
+  }
+  pi.empirique <- pi.empirique/length(data)
+
+  return(pi.empirique)
 }
