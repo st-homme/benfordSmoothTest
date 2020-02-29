@@ -1,35 +1,36 @@
-# require("R/probabilite_benford.R")
-# require("R/quantile_benford.R")
-# library("polynom")
-# library("gtools")
+source("R/probabilite_benford.R")
+source("R/quantile_benford.R")
+library("polynom")
+library("gtools")
 
 #' Tk du test de Benford
 #' Une fonction pour appliquer le smooth test à des données
 #'
 #' @param data un vecteur numerique
-#' @param K un nombre entre 1 et 7
-#' @param digits le digit a testé
+#' @param K number of tk between 1 and 7
+#' @param digits the digit
 #' @param optimal_t_k boolean
-#' @param alpha niveau de confiance
-#' @param nb_repetition Monte carlo repetition
+#' @param level niveau de confiance
+#' @param MC_replication Monte carlo repetition
 #' @return la fonction renvoie un vecteur contenant les tk
 #' @import gtools
 #' @export
-BenfordSmooth.test <- function(data, K, digits= 1, alpha=0.05,
-                               nb_repetition= 5000,optimal_t_k=TRUE ){
-  support_vector <- c(1:9)
+BenfordSmooth.test <- function(data, K, digits= 1, level=0.05,
+                               MC_replication= 5000,optimal_t_k=TRUE ){
+
   probabilite_theorique <- generer_probabilite_theorique(digits)
-  result_empirique <- calcul_tk(data, K,support_vector, probabilite_theorique)
+  result_empirique <- calcul_tk(data, K)
 
   taille <- length(data)
-  probabilite_empirique <- generer_probabilite_empirique(data, support_vector)
+  probabilite_empirique <- generer_probabilite_empirique(data, digits)
   result_empirique <- c(result_empirique,calcul_tk_widehat(result_empirique, K, taille , base=10))
   p_value_vector <-c()
   if(taille <= 100){
-    quantile_vector <- calcul_quantile_monte_carlo(alpha, taille=1000, nb_repetition,
+    print('Computing Monte Carlo quantiles. This may take a few minutes ')
+    quantile_vector <- calcul_quantile_monte_carlo(level, taille=1000, MC_replication,
                                                     digits, K, support_vector,
                                                     base_smooth=10, optimal_t_k)
-    p_value_vector <- calcul_p_value(taille ,nb_repetition, quantile_vector,
+    p_value_vector <- calcul_p_value(taille ,MC_replication, quantile_vector,
                                      K,probabilite_theorique,
                                      probabilite_empirique,base_smooth=10,
                                      optimal_t_k,support_vector)
@@ -41,10 +42,10 @@ BenfordSmooth.test <- function(data, K, digits= 1, alpha=0.05,
     p_value_vector <- c(p_value_vector, pchisq(result_empirique[K+1], df=1,lower.tail=TRUE) )
     # p_value_vector <- pchisq(result_empirique, df=K, lower.tail=FALSE)
   }
-  result <- rbind(result_empirique,p_value_vector )
+  result <- rbind(result_empirique,1-p_value_vector)
   row.names(result) <- c("Tk", "P-value")
   colnames(result) <- c(1:K, "K data driven")
-  return(result)
+  return(as.data.frame(result))
 }
 ###############################################################################################################
 
@@ -128,7 +129,7 @@ calcul_U_for_j <- function(j, data, taille, polynome.h.j){
 #' @param proba.vector venant la fonction h_for_j
 #' @return la fonction renvoie le tk
 #' @export
-calcul_tk<- function(data, K, support.vector=c(1:9), proba.vector=rep(1/9, 9)){
+calcul_tk<- function(data, K){
   #print(polynome.h)
   resultat <- vector()
   taille <- length(data)

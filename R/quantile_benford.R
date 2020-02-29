@@ -11,6 +11,7 @@
 #' @param optimal_t_k boolean
 #' @return la fonction renvoie une matrice
 #' @import stats
+#' @import utils
 #' @export
 calcul_quantile_monte_carlo <- function(alpha, taille, nb_repetition, digits=1,
                             K=4, support_vector=c(1:9),
@@ -29,7 +30,9 @@ calcul_quantile_monte_carlo <- function(alpha, taille, nb_repetition, digits=1,
 
   # Si freq.cumule.digits.data
   # P freq.digits.data
+  pb <- txtProgressBar(min = 1, max = nb_repetition, style = 3)
   for(compteur in 1:nb_repetition){
+
     data <-  generer_data_benford(n = taille, support_vector_to_use = support_vector,
                                   digits = digits, base = base_smooth)
     proba_emprique <- generer_probabilite_empirique(data, support_vector)
@@ -38,7 +41,9 @@ calcul_quantile_monte_carlo <- function(alpha, taille, nb_repetition, digits=1,
       result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
     }
     tmp_test_simuler[, compteur] <- result
+    setTxtProgressBar(pb, compteur)
   }
+  close(pb)
   return(apply(tmp_test_simuler, 1, function(x){quantile(x, (1-alpha))}))
 }
 

@@ -9,21 +9,21 @@ BenfordSmooth.test(
   data,
   K,
   digits = 1,
-  alpha = 0.05,
-  nb_repetition = 5000,
+  level = 0.05,
+  MC_replication = 5000,
   optimal_t_k = TRUE
 )
 }
 \arguments{
 \item{data}{un vecteur numerique}
 
-\item{K}{un nombre entre 1 et 7}
+\item{K}{number of tk between 1 and 7}
 
-\item{digits}{le digit a testé}
+\item{digits}{the digit}
 
-\item{alpha}{niveau de confiance}
+\item{level}{niveau de confiance}
 
-\item{nb_repetition}{Monte carlo repetition}
+\item{MC_replication}{Monte carlo repetition}
 
 \item{optimal_t_k}{boolean}
 }

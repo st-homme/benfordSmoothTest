@@ -1,6 +1,6 @@
 Package: BenfordSmoothTest
 Title: Smooth Test For Benfords Law
-Version: 0.0.1
+Version: 0.0.3
 Authors@R: c( 
     person(given = "Gilles",
            family = "Ducharme",
@@ -13,9 +13,9 @@ Authors@R: c(
            email = "credo.vovor-dassu@umontpellier.fr",
            comment = c(ORCID = "0000-0001-5814-0266"))
            )
-Description: Test d adéquation: smooth test for benfords law. Plus d informations en contactant les auteurs.
+Description: Compute the Tk and Th-hat for the smooth test for the Newcomb-Benford distribution.
 License: GPL-3
-Depends: R (>= 3.4.0),gtools,polynom, stats
+Depends: R (>= 3.4.0),gtools,polynom, stats,utils
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
