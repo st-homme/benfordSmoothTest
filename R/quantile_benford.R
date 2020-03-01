@@ -36,7 +36,7 @@ calcul_quantile_monte_carlo <- function(alpha, taille, nb_repetition, digits=1,
     data <-  generer_data_benford(n = taille, support_vector_to_use = support_vector,
                                   digits = digits, base = base_smooth)
     proba_emprique <- generer_probabilite_empirique(data, support_vector)
-    result <- calcul_tk(data, K,support_vector, proba_theorique)
+    result <- calcul_tk(data, K)
     if(optimal_t_k){
       result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
     }
@@ -85,7 +85,7 @@ calcul_p_value <- function(taille ,nb_repetition, quantile_vector,
                      prob = probabilite_empirique,
                      replace = TRUE )
 
-      result <- calcul_tk(data, K, support_vector, probabilite_theorique)
+      result <- calcul_tk(data, K)
       if(optimal_t_k){
         result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
       }

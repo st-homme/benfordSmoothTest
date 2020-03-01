@@ -1,7 +1,7 @@
-source("R/probabilite_benford.R")
-source("R/quantile_benford.R")
-library("polynom")
-library("gtools")
+# source("R/probabilite_benford.R")
+# source("R/quantile_benford.R")
+# library("polynom")
+# library("gtools")
 
 #' Tk du test de Benford
 #' Une fonction pour appliquer le smooth test à des données
@@ -17,12 +17,12 @@ library("gtools")
 #' @export
 BenfordSmooth.test <- function(data, K, digits= 1, level=0.05,
                                MC_replication= 5000,optimal_t_k=TRUE ){
-
+  support_vector <- generer_vector_number_of_digit(digits)
   probabilite_theorique <- generer_probabilite_theorique(digits)
   result_empirique <- calcul_tk(data, K)
 
   taille <- length(data)
-  probabilite_empirique <- generer_probabilite_empirique(data, digits)
+  probabilite_empirique <- generer_probabilite_empirique(data, support_vector)
   result_empirique <- c(result_empirique,calcul_tk_widehat(result_empirique, K, taille , base=10))
   p_value_vector <-c()
   if(taille <= 100){
@@ -125,8 +125,6 @@ calcul_U_for_j <- function(j, data, taille, polynome.h.j){
 #'
 #' @param K numerique entre 1 et 7
 #' @param data vecteur numérique
-#' @param support.vector numerique
-#' @param proba.vector venant la fonction h_for_j
 #' @return la fonction renvoie le tk
 #' @export
 calcul_tk<- function(data, K){
