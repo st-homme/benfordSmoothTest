@@ -13,7 +13,6 @@ calcul_p_value(
   probabilite_theorique,
   probabilite_empirique,
   base_smooth,
-  optimal_t_k = FALSE,
   support_vector = c(1:9)
 )
 }
@@ -31,8 +30,6 @@ calcul_p_value(
 \item{probabilite_empirique}{vecteur de probabilite empirique}
 
 \item{base_smooth}{Base}
-
-\item{optimal_t_k}{boolean}
 
 \item{support_vector}{vecteur numerique}
 }

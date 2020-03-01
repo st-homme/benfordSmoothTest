@@ -5,16 +5,12 @@
 \title{Calcul des tk
 Une fonction pour calculer les tk}
 \usage{
-calcul_tk(data, K, support.vector = c(1:9), proba.vector = rep(1/9, 9))
+calcul_tk(data, K)
 }
 \arguments{
 \item{data}{vecteur numérique}
 
 \item{K}{numerique entre 1 et 7}
-
-\item{support.vector}{numerique}
-
-\item{proba.vector}{venant la fonction h_for_j}
 }
 \value{
 la fonction renvoie le tk

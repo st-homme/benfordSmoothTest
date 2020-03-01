@@ -1,27 +1,23 @@
 #' Calcul de la table de quantile Smooth test par Monte carlo
 #' Une fonction pour calculer la table de quantile à la Benford
 #'
-#' @param alpha niveau de confiance
 #' @param taille taille de l echantillon
 #' @param nb_repetition nombre de repetititons
 #' @param digits FSD
 #' @param K nombre  de smooth test
 #' @param support_vector vecteur numerique
 #' @param base_smooth base
-#' @param optimal_t_k boolean
 #' @return la fonction renvoie une matrice
 #' @import stats
 #' @import utils
 #' @export
-calcul_quantile_monte_carlo <- function(alpha, taille, nb_repetition, digits=1,
-                            K=4, support_vector=c(1:9),
-                            base_smooth=10, optimal_t_k=TRUE){
-  nb_row <- K
+calcul_quantile_monte_carlo <- function(taille, nb_repetition, digits=1,
+                            K=5, support_vector=c(1:9),
+                            base_smooth=10){
+  nb_row <- K+1
   name_row <- paste0("T",1:K)
-  if (optimal_t_k){
-    nb_row <- nb_row + 1
-    name_row <- c(name_row, "T_k")
-  }
+  name_row <- c(name_row, "T_k")
+
   tmp_test_simuler <- matrix(NA, nb_row, nb_repetition)
 
   row.names(tmp_test_simuler) <- name_row
@@ -35,16 +31,14 @@ calcul_quantile_monte_carlo <- function(alpha, taille, nb_repetition, digits=1,
 
     data <-  generer_data_benford(n = taille, support_vector_to_use = support_vector,
                                   digits = digits, base = base_smooth)
-    proba_emprique <- generer_probabilite_empirique(data, support_vector)
+    proba_emprique <- generer_probabilite_empirique(data, support_vector,digits)
     result <- calcul_tk(data, K)
-    if(optimal_t_k){
-      result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
-    }
+    result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
     tmp_test_simuler[, compteur] <- result
     setTxtProgressBar(pb, compteur)
   }
   close(pb)
-  return(apply(tmp_test_simuler, 1, function(x){quantile(x, (1-alpha))}))
+  return(apply(tmp_test_simuler, 1, function(x){quantile(x, 0.05)}))
 }
 
 
@@ -59,22 +53,18 @@ calcul_quantile_monte_carlo <- function(alpha, taille, nb_repetition, digits=1,
 #' @param K nombre  de smooth test
 #' @param support_vector vecteur numerique
 #' @param base_smooth Base
-#' @param optimal_t_k boolean
 #' @param quantile_vector vecteur quantile
 #' @return la fonction renvoie un vecteur de p-value
 #' @export
 calcul_p_value <- function(taille ,nb_repetition, quantile_vector,
                                    K=4,probabilite_theorique,
                                    probabilite_empirique,base_smooth,
-                                   optimal_t_k=FALSE,support_vector=c(1:9)){
+                                   support_vector=c(1:9)){
   nb_row <- K
-
   name_row <- paste0("S", 1:K)
+  nb_row <- nb_row + 1
+  name_row <- c(name_row, "S_k")
 
-  if (optimal_t_k){
-    nb_row <- nb_row + 1
-    name_row <- c(name_row, "S_k")
-  }
 
   puissance_vect<- rep(0, nb_row)
   puissance_matrice <- matrix(0, nb_row, nb_repetition)
@@ -86,9 +76,8 @@ calcul_p_value <- function(taille ,nb_repetition, quantile_vector,
                      replace = TRUE )
 
       result <- calcul_tk(data, K)
-      if(optimal_t_k){
-        result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
-      }
+      result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
+
 
       puissance_matrice[1:nb_row, a] <- as.numeric(result > quantile_vector)
 

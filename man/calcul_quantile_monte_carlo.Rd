@@ -6,19 +6,15 @@
 Une fonction pour calculer la table de quantile à la Benford}
 \usage{
 calcul_quantile_monte_carlo(
-  alpha,
   taille,
   nb_repetition,
   digits = 1,
-  K = 4,
+  K = 5,
   support_vector = c(1:9),
-  base_smooth = 10,
-  optimal_t_k = TRUE
+  base_smooth = 10
 )
 }
 \arguments{
-\item{alpha}{niveau de confiance}
-
 \item{taille}{taille de l echantillon}
 
 \item{nb_repetition}{nombre de repetititons}
@@ -30,8 +26,6 @@ calcul_quantile_monte_carlo(
 \item{support_vector}{vecteur numerique}
 
 \item{base_smooth}{base}
-
-\item{optimal_t_k}{boolean}
 }
 \value{
 la fonction renvoie une matrice

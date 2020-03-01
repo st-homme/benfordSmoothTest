@@ -2,35 +2,24 @@
 % Please edit documentation in R/smooth_test.R
 \name{BenfordSmooth.test}
 \alias{BenfordSmooth.test}
-\title{Tk du test de Benford
-Une fonction pour appliquer le smooth test à des données}
+\title{Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} ( 1 <= Kmax <=  7 )
+ and T_K-hat (the data-driven version) for the null hypothesis of a Newcomb-Benford distribution.}
 \usage{
-BenfordSmooth.test(
-  data,
-  K,
-  digits = 1,
-  level = 0.05,
-  MC_replication = 5000,
-  optimal_t_k = TRUE
-)
+BenfordSmooth.test(data, Kmax = 5, MC_replication = 5000)
 }
 \arguments{
-\item{data}{un vecteur numerique}
+\item{data}{A data vector of integers  {1,2,…,9}. Otherwise, the first significant digit is considered}
 
-\item{K}{number of tk between 1 and 7}
+\item{Kmax}{integer between 1 and 7: default = 5}
 
-\item{digits}{the digit}
-
-\item{level}{niveau de confiance}
-
-\item{MC_replication}{Monte carlo repetition}
-
-\item{optimal_t_k}{boolean}
+\item{MC_replication}{Number of Monte Carlo replication to compute the p-values: default = 5000}
 }
 \value{
-la fonction renvoie un vecteur contenant les tk
+The function returns the values of the tests statistics in the family of test statistics {T_k, k = 1, Kmax}
+and the data-driven smooth test  T_K-hat
+as well as their p-values (Monte carlo if n <= 100, asymptotic chi-square otherwise).
 }
 \description{
-Tk du test de Benford
-Une fonction pour appliquer le smooth test à des données
+Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} ( 1 <= Kmax <=  7 )
+ and T_K-hat (the data-driven version) for the null hypothesis of a Newcomb-Benford distribution.
 }

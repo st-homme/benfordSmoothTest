@@ -126,8 +126,15 @@ generer_data_benford <- function(n, support_vector_to_use,
 #' @param digits FSD
 #' @return la fonction renvoie un vecteur de probabilite
 #' @export
-generer_probabilite_empirique <- function(data, support_vector_to_use,digits=1){
-  data <- unlist(get_n_element_des_nombres(data, digits))
+generer_probabilite_empirique <- function(data, support_vector_to_use,digits){
+  data <- get_n_element_des_nombres(data, digits)
+  tmp.vector <- vector()
+  for(i in 1:length(data)){
+    tmp <- paste(data[[i]][1:digits], collapse ="")
+    tmp.vector[i] <- as.numeric(tmp)
+  }
+
+  data <- tmp.vector
   pi.empirique <- vector()
   k <- 1
   for (i in support_vector_to_use){

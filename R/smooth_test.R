@@ -3,49 +3,54 @@
 # library("polynom")
 # library("gtools")
 
-#' Tk du test de Benford
-#' Une fonction pour appliquer le smooth test à des données
+#' Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} ( 1 <= Kmax <=  7 )
+#'  and T_K-hat (the data-driven version) for the null hypothesis of a Newcomb-Benford distribution.
 #'
-#' @param data un vecteur numerique
-#' @param K number of tk between 1 and 7
-#' @param digits the digit
-#' @param optimal_t_k boolean
-#' @param level niveau de confiance
-#' @param MC_replication Monte carlo repetition
-#' @return la fonction renvoie un vecteur contenant les tk
+#' @param data 	A data vector of integers  {1,2,…,9}. Otherwise, the first significant digit is considered
+#' @param Kmax integer between 1 and 7: default = 5
+#' @param MC_replication 	Number of Monte Carlo replication to compute the p-values: default = 5000
+#' @return The function returns the values of the tests statistics in the family of test statistics {T_k, k = 1, Kmax}
+#' and the data-driven smooth test  T_K-hat
+#' as well as their p-values (Monte carlo if n <= 100, asymptotic chi-square otherwise).
 #' @import gtools
 #' @export
-BenfordSmooth.test <- function(data, K, digits= 1, level=0.05,
-                               MC_replication= 5000,optimal_t_k=TRUE ){
-  support_vector <- generer_vector_number_of_digit(digits)
+BenfordSmooth.test <- function(data, Kmax=5,
+                               MC_replication= 5000){
+  digits <-1
+  support_vector <- sort(generer_vector_number_of_digit(digits))
   probabilite_theorique <- generer_probabilite_theorique(digits)
-  result_empirique <- calcul_tk(data, K)
+  result_empirique <- calcul_tk(data, Kmax)
 
   taille <- length(data)
-  probabilite_empirique <- generer_probabilite_empirique(data, support_vector)
-  result_empirique <- c(result_empirique,calcul_tk_widehat(result_empirique, K, taille , base=10))
+  probabilite_empirique <- generer_probabilite_empirique(data, support_vector, digits)
+
+  result_empirique <- c(result_empirique,calcul_tk_widehat(result_empirique, Kmax,
+                                                           taille , base=exp(1)))
   p_value_vector <-c()
   if(taille <= 100){
     print('Computing Monte Carlo quantiles. This may take a few minutes ')
-    quantile_vector <- calcul_quantile_monte_carlo(level, taille=1000, MC_replication,
-                                                    digits, K, support_vector,
-                                                    base_smooth=10, optimal_t_k)
+    quantile_vector <- calcul_quantile_monte_carlo(taille=1000, MC_replication,
+                                                    digits, Kmax, support_vector,
+                                                    base_smooth=exp(1))
     p_value_vector <- calcul_p_value(taille ,MC_replication, quantile_vector,
-                                     K,probabilite_theorique,
-                                     probabilite_empirique,base_smooth=10,
-                                     optimal_t_k,support_vector)
+                                     Kmax,probabilite_theorique,
+                                     probabilite_empirique,base_smooth=exp(1),
+                                     support_vector)
   }else{
     p_value_vector < c()
-    for(i in 1:K){
+    for(i in 1:Kmax){
       p_value_vector <- c(p_value_vector, pchisq(result_empirique[i], df=i, lower.tail=TRUE) )
     }
-    p_value_vector <- c(p_value_vector, pchisq(result_empirique[K+1], df=1,lower.tail=TRUE) )
+    p_value_vector <- c(p_value_vector, pchisq(result_empirique[Kmax+1], df=1,lower.tail=TRUE) )
+    p_value_vector <-p_value_vector
     # p_value_vector <- pchisq(result_empirique, df=K, lower.tail=FALSE)
   }
-  result <- rbind(result_empirique,1-p_value_vector)
-  row.names(result) <- c("Tk", "P-value")
-  colnames(result) <- c(1:K, "K data driven")
-  return(as.data.frame(result))
+  names_row <- c(1:Kmax,"Kmax")
+
+  result <- rbind(names_row, round(result_empirique,5), round(1-p_value_vector, 5))
+  row.names(result) <- c("K","T_k", "p-value")
+
+  return(prmatrix(result, collab = rep_len("", ncol(result)),quote = FALSE))
 }
 ###############################################################################################################
 

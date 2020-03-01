@@ -5,7 +5,7 @@
 \title{Generer le vecteur de probabilite emprique
 Une fonction pour generer le vecteur de probabilite emprique}
 \usage{
-generer_probabilite_empirique(data, support_vector_to_use, digits = 1)
+generer_probabilite_empirique(data, support_vector_to_use, digits)
 }
 \arguments{
 \item{data}{vecteur numerique}
