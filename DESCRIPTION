@@ -1,6 +1,6 @@
 Package: BenfordSmoothTest
 Title: Smooth Tests For The Newcomb-Benford Distribution
-Version: 0.0.6
+Version: 1.0
 Authors@R: c( 
     person(given = "Gilles",
            family = "Ducharme",
