@@ -1,17 +1,5 @@
-#' Calcul de la table de quantile Smooth test par Monte carlo
-#' Une fonction pour calculer la table de quantile à la Benford
-#'
-#' @param taille taille de l echantillon
-#' @param nb_repetition nombre de repetititons
-#' @param digits FSD
-#' @param K nombre  de smooth test
-#' @param support_vector vecteur numerique
-#' @param base_smooth base
-#' @return la fonction renvoie une matrice
-#' @import stats
-#' @import utils
-#' @export
-calcul_quantile_monte_carlo <- function(taille, nb_repetition, digits=1,
+
+.calcul_p_value <- function(data_empirique, taille, nb_repetition, digits=1,
                             K=5, support_vector=c(1:9),
                             base_smooth=10){
   nb_row <- K+1
@@ -22,68 +10,32 @@ calcul_quantile_monte_carlo <- function(taille, nb_repetition, digits=1,
 
   row.names(tmp_test_simuler) <- name_row
 
-  proba_theorique  <- generer_probabilite_theorique(digits)
+  proba_theorique  <- .generer_probabilite_theorique(digits)
 
   # Si freq.cumule.digits.data
   # P freq.digits.data
+  puissance_matrice <- matrix(0, nb_row, nb_repetition)
+  result_empirique <- .calcul_tk(data_empirique, K)
+  result_empirique <- c(result_empirique,.calcul_tk_widehat(result_empirique, K, taille , base_smooth))
   pb <- txtProgressBar(min = 1, max = nb_repetition, style = 3)
   for(compteur in 1:nb_repetition){
 
-    data <-  generer_data_benford(n = taille, support_vector_to_use = support_vector,
+    data <-  .generer_data_benford(n = taille, support_vector_to_use = support_vector,
                                   digits = digits, base = base_smooth)
-    proba_emprique <- generer_probabilite_empirique(data, support_vector,digits)
-    result <- calcul_tk(data, K)
-    result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
-    tmp_test_simuler[, compteur] <- result
+    result_benford <- .calcul_tk(data, K)
+    result_benford <- c(result_benford,.calcul_tk_widehat(result_benford, K, taille , base_smooth))
+
+    puissance_matrice[1:nb_row, compteur] <- as.numeric(result_empirique > result_benford)
+
+    # tmp_test_simuler[, compteur] <- result
     setTxtProgressBar(pb, compteur)
   }
   close(pb)
-  return(apply(tmp_test_simuler, 1, function(x){quantile(x, 0.05)}))
-}
-
-
-
-#' Calcul de la p-value
-#' Une fonction pour calculer la p-value
-#'
-#' @param probabilite_theorique vecteur de probabilite theorique
-#' @param probabilite_empirique vecteur de probabilite empirique
-#' @param taille taille de l echantillon
-#' @param nb_repetition nombre de repetititons
-#' @param K nombre  de smooth test
-#' @param support_vector vecteur numerique
-#' @param base_smooth Base
-#' @param quantile_vector vecteur quantile
-#' @return la fonction renvoie un vecteur de p-value
-#' @export
-calcul_p_value <- function(taille ,nb_repetition, quantile_vector,
-                                   K=4,probabilite_theorique,
-                                   probabilite_empirique,base_smooth,
-                                   support_vector=c(1:9)){
-  nb_row <- K
-  name_row <- paste0("S", 1:K)
-  nb_row <- nb_row + 1
-  name_row <- c(name_row, "S_k")
-
-
-  puissance_vect<- rep(0, nb_row)
-  puissance_matrice <- matrix(0, nb_row, nb_repetition)
-  #progress.bar <- txtProgressBar(min = 0, max = length(taille.vector), style = 3)
-
-  for (a in 1: nb_repetition){
-      data <- sample(support_vector, size = taille,
-                     prob = probabilite_empirique,
-                     replace = TRUE )
-
-      result <- calcul_tk(data, K)
-      result <- c(result,calcul_tk_widehat(result, K, taille , base_smooth))
-
-
-      puissance_matrice[1:nb_row, a] <- as.numeric(result > quantile_vector)
-
-    }
   p_value <- apply(puissance_matrice, 1, sum)
+
   p_value <- p_value / nb_repetition
   return(p_value)
 }
+
+
 

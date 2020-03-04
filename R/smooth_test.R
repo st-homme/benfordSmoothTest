@@ -3,65 +3,78 @@
 # library("polynom")
 # library("gtools")
 
-#' Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} ( 1 <= Kmax <=  7 )
+#' Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} (1 <= Kmax <=  7 )
 #'  and T_K-hat (the data-driven version) for the null hypothesis of a Newcomb-Benford distribution.
 #'
-#' @param data 	A data vector of integers  {1,2,…,9}. Otherwise, the first significant digit is considered
+#' @param data 	A numeric vector of integers in {1,2,…,9}. If numeric, the first significant digit is extracted
 #' @param Kmax integer between 1 and 7: default = 5
 #' @param MC_replication 	Number of Monte Carlo replication to compute the p-values: default = 5000
-#' @return The function returns the values of the tests statistics in the family of test statistics {T_k, k = 1, Kmax}
+#' @return The function returns the values of the tests statistics in the family  {T_k, k = 1,..., Kmax}
 #' and the data-driven smooth test  T_K-hat
 #' as well as their p-values (Monte carlo if n <= 100, asymptotic chi-square otherwise).
 #' @import gtools
+#' @import polynom
+#' @import  stats
+#' @import utils
 #' @export
 BenfordSmooth.test <- function(data, Kmax=5,
                                MC_replication= 5000){
+  if(Kmax >7){
+    print("Kmax is too large.  (1 <= Kmax <= 7)")
+    return(TRUE)
+  }
   digits <-1
-  support_vector <- sort(generer_vector_number_of_digit(digits))
-  probabilite_theorique <- generer_probabilite_theorique(digits)
-  result_empirique <- calcul_tk(data, Kmax)
+  support_vector <- sort(.generer_vector_number_of_digit(digits))
+  probabilite_theorique <- .generer_probabilite_theorique(digits)
+  # print(probabilite_theorique)
+
+
+  data <- .get_n_element_des_nombres(data, digits)
+  tmp.vector <- vector()
+  for(i in 1:length(data)){
+    tmp <- paste(data[[i]][1:digits], collapse ="")
+    tmp.vector[i] <- as.numeric(tmp)
+  }
+
+  data <- tmp.vector
+
+  result_empirique <- .calcul_tk(data, Kmax)
 
   taille <- length(data)
-  probabilite_empirique <- generer_probabilite_empirique(data, support_vector, digits)
+  probabilite_empirique <- .generer_probabilite_empirique(data, support_vector, digits)
 
-  result_empirique <- c(result_empirique,calcul_tk_widehat(result_empirique, Kmax,
+  result_empirique <- c(result_empirique,.calcul_tk_widehat(result_empirique, Kmax,
                                                            taille , base=exp(1)))
   p_value_vector <-c()
   if(taille <= 100){
-    print('Computing Monte Carlo quantiles. This may take a few minutes ')
-    quantile_vector <- calcul_quantile_monte_carlo(taille=1000, MC_replication,
+    print('Computing Monte Carlo quantiles. This may take a few instants')
+    p_value_vector <- .calcul_p_value(data, taille=1000, MC_replication,
                                                     digits, Kmax, support_vector,
                                                     base_smooth=exp(1))
-    p_value_vector <- calcul_p_value(taille ,MC_replication, quantile_vector,
-                                     Kmax,probabilite_theorique,
-                                     probabilite_empirique,base_smooth=exp(1),
-                                     support_vector)
+    # p_value_vector <- .calcul_p_value(data,taille ,MC_replication, quantile_vector,
+    #                                  Kmax,probabilite_theorique,
+    #                                  probabilite_empirique,base_smooth=exp(1),
+    #                                  support_vector)
   }else{
     p_value_vector < c()
     for(i in 1:Kmax){
       p_value_vector <- c(p_value_vector, pchisq(result_empirique[i], df=i, lower.tail=TRUE) )
     }
     p_value_vector <- c(p_value_vector, pchisq(result_empirique[Kmax+1], df=1,lower.tail=TRUE) )
-    p_value_vector <-p_value_vector
+    # p_value_vector <-p_value_vector
     # p_value_vector <- pchisq(result_empirique, df=K, lower.tail=FALSE)
   }
-  names_row <- c(1:Kmax,"Kmax")
+  names_row <- c(1:(Kmax-1),paste0(Kmax,"=","Kmax"),"K_hat")
 
-  result <- rbind(names_row, round(result_empirique,5), round(1-p_value_vector, 5))
-  row.names(result) <- c("K","T_k", "p-value")
+  result <- rbind(names_row, round(result_empirique,3), round(1-p_value_vector, 4))
+  row.names(result) <- c("k","T_k", "p-value")
 
   return(prmatrix(result, collab = rep_len("", ncol(result)),quote = FALSE))
 }
 ###############################################################################################################
 
-#' Polynome Hj
-#' Une fonction pour appliquer le smooth test à des données
-#'
-#' @param j numerique entre 1 et 7
-#' @return la fonction renvoie le polynome
-#' @import polynom
-#' @export
-get_polynome_h_for_j <- function(j){
+
+.get_polynome_h_for_j <- function(j){
   if(j==1){
     return(polynomial(c(-1.3979030247488394121040493613182696526739584777368 ,
                         0.40633916736200686478542965064543693283491024599939)))
@@ -111,107 +124,61 @@ get_polynome_h_for_j <- function(j){
 
 }
 
-#' Calcul des Uj
-#' Une fonction pour calculer les Uj
-#'
-#' @param j numerique entre 1 et 7
-#' @param data vecteur numérique
-#' @param taille numerique
-#' @param polynome.h.j venant la fonction h_for_j
-#' @return la fonction renvoie le polynome
-#' @importFrom stats predict
-#' @export
-calcul_U_for_j <- function(j, data, taille, polynome.h.j){
+
+.calcul_U_for_j <- function(j, data, taille, polynome.h.j){
   return((1/sqrt(taille)) * sum(predict(polynome.h.j, data)))
 }
 
-#' Calcul des tk
-#' Une fonction pour calculer les tk
-#'
-#' @param K numerique entre 1 et 7
-#' @param data vecteur numérique
-#' @return la fonction renvoie le tk
-#' @export
-calcul_tk<- function(data, K){
+.calcul_tk<- function(data, K){
   #print(polynome.h)
   resultat <- vector()
   taille <- length(data)
   for(j in 1:K ){
     if (j == 1 ){
-      resultat[j] = (calcul_U_for_j(j, data, taille, get_polynome_h_for_j(j))^2)
+      resultat[j] = (.calcul_U_for_j(j, data, taille, .get_polynome_h_for_j(j))^2)
     }else{
-      resultat[j] = resultat[j-1] +  (calcul_U_for_j(j, data, taille,get_polynome_h_for_j(j) )^2)
+      resultat[j] = resultat[j-1] +  (.calcul_U_for_j(j, data, taille,.get_polynome_h_for_j(j) )^2)
     }
   }
   return(resultat)
 }
 
-##################### Gestion optimum Calcul de  $ T_{\widehat{k}$####################################
-#' Calcul du tk chapeau
-#' Une fonction pour calculer le tk chapeau
-#'
-#' @param K numerique entre 1 et 7
-#' @param Tki vecteur de tk
-#' @param taille taille de l'echantillon
-#' @param base base logarithmique
-#' @return la fonction renvoie le meilleur tk
-#' @export
-calcul_tk_widehat <- function(Tki, K ,taille, base){
+.calcul_tk_widehat <- function(Tki, K ,taille, base){
   return(Tki[which((Tki - (1:K) * log(taille, base))== max(Tki - (1:K) * log(taille, base)) )])
 }
 
 ######################### Gestion Permutation ########################"
-#' Calcul du tk chapeau
-#' Une fonction pour calculer le tk chapeau
-#'
-#' @param K numerique entre 1 et 7
-#' @param data vecteur numerique
-#' @return la fonction renvoie le polynome
-
-#' @export
-calcul_permutations_tk_matrix <- function(data, K){
+.calcul_permutations_tk_matrix <- function(data, K){
   base <-  10
   vector.permutations <-  permutations(n=3, r=3, v=c(1:K))
   #vector.permutations <- matrix(c(1, 2, 3, 2, 1, 3, 2 , 3 ,1) , nrow = 3, ncol = 3, byrow = TRUE)
-  vector.uj <- calcul_permutations_uj(data, K)
+  vector.uj <- .calcul_permutations_uj(data, K)
 
   res <- vector()
   n  <- length(data)
   #print(vector.permutations)
   #Ti.matrix <- matrix(NA , factorial(3), K)
   for(i in 1: nrow(vector.permutations)){
-    Ti <- calcul_permutations_tk( c(vector.uj[c(vector.permutations[i,],4:K)]), K)
-    res[i] <- calcul_tk_widehat(Ti, K, n , base)
+    Ti <- .calcul_permutations_tk( c(vector.uj[c(vector.permutations[i,],4:K)]), K)
+    res[i] <- .calcul_tk_widehat(Ti, K, n , base)
   }
 
   return(res)
 }
 
 # ################################################
-#' Calcul du tk chapeau
-#' Une fonction pour calculer le tk chapeau
-#'
-#' @param K numerique entre 1 et 7
-#' @param uj.vector vecteur de uj
-#' @return la fonction renvoie le polynome
-#' @export
-calcul_permutations_tk<- function(uj.vector,K){
+
+.calcul_permutations_tk<- function(uj.vector,K){
   return(cumsum(uj.vector^2))
 }
 
 # ##### Calcul de  $T_{permutations}$
-#' Calcul du tk chapeau
-#' Une fonction pour calculer le tk chapeau
-#'
-#' @param K numerique entre 1 et 7
-#' @param data vecteur numerique
-#' @return la fonction renvoie le polynome
-#' @export
-calcul_permutations_uj <- function(data, K){
+
+.calcul_permutations_uj <- function(data, K){
   resultat <- vector()
   taille <- length(data)
   for(j in 1:K ){
-    resultat[j] <- (calcul_U_for_j(j, data, taille, get_polynome_h_for_j(j)))
+    resultat[j] <- (.calcul_U_for_j(j, data, taille, .get_polynome_h_for_j(j)))
   }
   return(resultat)
 }

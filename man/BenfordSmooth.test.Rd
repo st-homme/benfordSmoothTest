@@ -2,24 +2,24 @@
 % Please edit documentation in R/smooth_test.R
 \name{BenfordSmooth.test}
 \alias{BenfordSmooth.test}
-\title{Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} ( 1 <= Kmax <=  7 )
+\title{Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} (1 <= Kmax <=  7 )
  and T_K-hat (the data-driven version) for the null hypothesis of a Newcomb-Benford distribution.}
 \usage{
 BenfordSmooth.test(data, Kmax = 5, MC_replication = 5000)
 }
 \arguments{
-\item{data}{A data vector of integers  {1,2,…,9}. Otherwise, the first significant digit is considered}
+\item{data}{A numeric vector of integers in {1,2,…,9}. If numeric, the first significant digit is extracted}
 
 \item{Kmax}{integer between 1 and 7: default = 5}
 
 \item{MC_replication}{Number of Monte Carlo replication to compute the p-values: default = 5000}
 }
 \value{
-The function returns the values of the tests statistics in the family of test statistics {T_k, k = 1, Kmax}
+The function returns the values of the tests statistics in the family  {T_k, k = 1,..., Kmax}
 and the data-driven smooth test  T_K-hat
 as well as their p-values (Monte carlo if n <= 100, asymptotic chi-square otherwise).
 }
 \description{
-Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} ( 1 <= Kmax <=  7 )
+Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} (1 <= Kmax <=  7 )
  and T_K-hat (the data-driven version) for the null hypothesis of a Newcomb-Benford distribution.
 }

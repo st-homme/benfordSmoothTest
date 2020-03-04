@@ -1,6 +1,6 @@
 Package: BenfordSmoothTest
 Title: Smooth Tests For The Newcomb-Benford Distribution
-Version: 0.0.4
+Version: 0.0.6
 Authors@R: c( 
     person(given = "Gilles",
            family = "Ducharme",
@@ -13,7 +13,7 @@ Authors@R: c(
            email = "credo.vovor-dassu@umontpellier.fr",
            comment = c(ORCID = "0000-0001-5814-0266"))
            )
-Description: Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1, Kmax} ( 1 <= Kmax <= 7) and T_K-hat (data-driven) for the null hypothesis of a Newcomb-Benford distribution. The p-values are computed by Monte-Carlo resampling (if n <= 100) and using the asymptotic chi-square distribution otherwise. See  https://arxiv.org/submit/??? for details. The data is expected to be a set of integers in {1,2,…,9}, otherwise the first significant digit of each data value is extracted and considered.
+Description: Compute the family of smooth goodness-of-fit test statistics {T_k, k = 1,..., Kmax} (1 <= Kmax <= 7) and T_K-hat (data-driven) for the null hypothesis of a Newcomb-Benford distribution. The p-values are computed by Monte-Carlo resampling (if n <= 100; by default 5000 Monte-Carlo replications), and using the asymptotic chi-square distribution otherwise. See  http://arxiv.org/abs/2003.00520 for details. The data is expected to be a set of integers in {1,2,…,9}, otherwise the first significant digit of each data value is extracted and use for the test.
 License: GPL-3
 Depends: R (>= 3.4.0),gtools,polynom, stats,utils
 Encoding: UTF-8
